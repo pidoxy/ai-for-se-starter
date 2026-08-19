@@ -17,6 +17,9 @@ uvicorn src.main:app --reload
 pytest
 ```
 
+One test is currently failing: `tests/test_pricing.py::test_tier_boundary_at_fifty`.
+It is a real defect in the tiered discount calculation, not a flaky test.
+
 ## Layout
 
 | Path | What lives there |

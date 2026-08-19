@@ -22,6 +22,11 @@ def test_tier_discounts(quantity, expected):
     assert tier_discount_for(quantity) == Decimal(expected)
 
 
+def test_tier_boundary_at_fifty():
+    """A line of exactly 50 units sits in the 50-199 band, so it gets 12%."""
+    assert tier_discount_for(50) == Decimal("0.12")
+
+
 def test_quantity_below_one_is_rejected():
     with pytest.raises(ValidationError):
         tier_discount_for(0)
