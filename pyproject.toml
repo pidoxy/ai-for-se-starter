@@ -8,6 +8,7 @@ dependencies = [
     "pydantic[email]>=2.6",
     "uvicorn[standard]>=0.27",
     "pyyaml>=6.0",
+    "fastapi-query-filters>=0.4",
 ]
 
 [project.optional-dependencies]

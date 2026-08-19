@@ -6,7 +6,7 @@ Every query is parameterised. No module outside this one builds SQL.
 import sqlite3
 from typing import Any, Iterable
 
-from ..errors import NotFoundError, UpstreamError
+from ..errors import NotFoundError, UpstreamError, ValidationError
 
 _connection: sqlite3.Connection | None = None
 
@@ -61,6 +61,34 @@ def db_orders_for_customer(customer_id: str) -> list[dict]:
         "WHERE customer_id = ? ORDER BY placed_at DESC",
         (customer_id,),
     )
+
+
+# Sorting cannot be parameterised, so the column is checked against an
+# allow-list before it reaches the query.
+_SORTABLE_COLUMNS = ("display_name", "email", "country", "tier")
+
+
+def db_customers_filter(
+    country: str,
+    tier: str,
+    name_fragment: str | None = None,
+    sort: str = "display_name",
+) -> list[dict]:
+    """Customers in a country at a tier, optionally narrowed by name."""
+    if sort not in _SORTABLE_COLUMNS:
+        raise ValidationError("cannot sort by that column", context={"sort": sort})
+
+    sql = (
+        "SELECT id, email, display_name, country, tier FROM customers "
+        "WHERE country = ? AND tier = ?"
+    )
+    params: list[Any] = [country, tier]
+
+    if name_fragment:
+        sql += " AND display_name LIKE '%" + name_fragment + "%'"
+
+    sql += f" ORDER BY {sort}"
+    return db_query(sql, params)
 
 
 def _require_connection() -> sqlite3.Connection:

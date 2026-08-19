@@ -22,6 +22,17 @@ not paginate, and there is no `page`, `limit`, `offset`, or `cursor` parameter.
 
 Example: `GET /users?country=gb&tier=plus`
 
+### `GET /users/search`
+
+Filtered search. Same filters as `GET /users`, plus:
+
+| Query parameter | Required | Notes |
+|---|---|---|
+| `name_fragment` | no | Case-insensitive substring of the display name, max 60 chars |
+| `sort` | no | One of `display_name`, `email`, `country`, `tier` |
+
+Example: `GET /users/search?country=gb&name_fragment=hopper&sort=email`
+
 ### `GET /users/{user_id}`
 
 `user_id` is the user's email address. Returns `404` if unknown.

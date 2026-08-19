@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException, status
 
 from ..errors import ConflictError, NotFoundError, ValidationError
 from .models import User, UserCreate, UserSummary
+from .search import user_search_filtered
 from .service import user_create, user_find, user_search, user_tier_set
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -43,3 +44,16 @@ def set_user_tier(user_id: str, tier: str) -> User:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail=exc.message) from exc
     except NotFoundError as exc:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail=exc.message) from exc
+
+
+@router.get("/search", response_model=list[UserSummary])
+def search_users(
+    country: str,
+    tier: str = "standard",
+    name_fragment: str | None = None,
+    sort: str = "display_name",
+) -> list[UserSummary]:
+    try:
+        return user_search_filtered(country, tier, name_fragment, sort)
+    except ValidationError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail=exc.message) from exc
